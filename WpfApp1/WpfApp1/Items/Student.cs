@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using ReportGeneration_Toshmatov.Classes;
-using WpfApp1.Pages;
+using ReportGeneration_Toshmatov.Pages;
 
 namespace Items
 {

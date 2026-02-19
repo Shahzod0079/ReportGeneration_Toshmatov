@@ -78,5 +78,16 @@ namespace ReportGeneration_Toshmatov.Pages
 
             CreateStudents(SearchStudent.FindAll(x => $"{x.Lastname} {x.Firstname}".Contains(TBFIO.Text)));
         }
+
+        /// <summary> Вызов метода генерации отчёта </summary>
+        private void ReportGeneration(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (CBGroups.SelectedIndex != CBGroups.Items.Count - 1)
+            {
+                int IdGroup = Allgroups.Find(x => x.Name == CBGroups.SelectedItem.ToString()).Id;
+
+                Classes.Common.Report.Group(IdGroup, this);
+            }
+        }
     }
 }
