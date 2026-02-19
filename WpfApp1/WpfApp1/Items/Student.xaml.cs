@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
 using ReportGeneration_Toshmatov.Classes;
-using WpfApp1.Pages;
+using ReportGeneration_Toshmatov.Pages;
 
 namespace ReportGeneration_Toshmatov.Items
 {
@@ -11,6 +11,7 @@ namespace ReportGeneration_Toshmatov.Items
     {
         private StudentContext student;
         private Main mainPage;
+        private Main main;
 
         public Student(StudentContext student, Main mainPage) 
         {
@@ -76,6 +77,8 @@ namespace ReportGeneration_Toshmatov.Items
 
             TBGroup.Text = mainPage.Allgroups.Find(x => x.Id == student.IdGroup)?.Name ?? "";
         }
+
+
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e) { }
     }

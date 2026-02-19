@@ -16,7 +16,7 @@ using ReportGeneration_Toshmatov.Classes;
 using ReportGeneration_Toshmatov.Items;
 using ReportGeneration_Toshmatov.Models;
 
-namespace WpfApp1.Pages
+namespace ReportGeneration_Toshmatov.Pages
 {
     /// <summary>
     /// Логика взаимодействия для Main.xaml
