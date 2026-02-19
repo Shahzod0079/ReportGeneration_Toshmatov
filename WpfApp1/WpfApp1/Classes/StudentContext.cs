@@ -9,7 +9,7 @@ using WpfApp1.Classes.Common;
 
 namespace ReportGeneration_Toshmatov.Classes
 {
-    class StudentContext : Student
+    public class StudentContext : Student
     {
         public StudentContext(int Id, string Firstname, string Lastname, int IdGroup, bool Expelled, DateTime DateExpelled) :
         base(Id, Firstname, Lastname, IdGroup, Expelled, DateExpelled)
