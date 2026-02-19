@@ -97,85 +97,68 @@ namespace ReportGeneration_Toshmatov.Classes.Common
 
                             foreach (WorkContext StudentWork in StudentWorks)
                             {
-                                // Получаем оценку за работу
                                 EvaluationContext Evaluation = main.AllEvaluation.Find(x =>
                                     x.IdWork == StudentWork.Id &&
                                     x.IdStudent == Student.Id);
 
-                                // Если оценки нет, или она пустая, или равно 2
                                 if ((Evaluation != null && (Evaluation.Value.Trim() == "" || Evaluation.Value.Trim() == "2"))
                                     || Evaluation == null)
                                 {
-                                    // Если практика
                                     if (StudentWork.IdType == 1)
-                                        // Считаем не сданную работу
                                         PracticeCount++;
-                                    // Если теория
+
                                     else if (StudentWork.IdType == 2)
-                                        // Считаем не сданную работу
                                         TheoryCount++;
                                 }
 
-                                // Проверяем что оценка не отсутствует и стоит пропуск
                                 if (Evaluation != null && !string.IsNullOrWhiteSpace(Evaluation.Lateness))
                                 {
-                                    // Если пропуск 90 минут
                                     if (Convert.ToInt32(Evaluation.Lateness) == 90)
-                                        // Считаем как пропущенную пару
                                         AbsenteeismCount++;
                                     else
-                                        // Считаем как опоздание
                                         LateCount++;
                                 }
                             }
                         }
 
-                        // Обращаемся к ячейке, указываем текст
                         (Worksheet.Cells[Height, 1] as Excel.Range).Value = $"({Student.Lastname}) {Student.Firstname}";
-                        // Присваиваем стили
                         Styles(Worksheet.Cells[Height, 1], 12, Excel.XlHAlign.xlHAlignLeft, true);
 
-                        // Обращаемся к ячейке, указываем текст
                         (Worksheet.Cells[Height, 2] as Excel.Range).Value = PracticeCount.ToString();
-                        // Присваиваем стили
                         Styles(Worksheet.Cells[Height, 2], 12, Excel.XlHAlign.xlHAlignCenter, true);
 
-                        // Обращаемся к ячейке, указываем текст
                         (Worksheet.Cells[Height, 3] as Excel.Range).Value = TheoryCount.ToString();
-                        // Присваиваем стили
+
                         Styles(Worksheet.Cells[Height, 3], 12, Excel.XlHAlign.xlHAlignCenter, true);
 
-                        // Обращаемся к ячейке, указываем текст
                         (Worksheet.Cells[Height, 4] as Excel.Range).Value = AbsenteeismCount.ToString();
-                        // Присваиваем стили
+
                         Styles(Worksheet.Cells[Height, 4], 12, Excel.XlHAlign.xlHAlignCenter, true);
 
-                        // Обращаемся к ячейке, указываем текст
                         (Worksheet.Cells[Height, 5] as Excel.Range).Value = LateCount.ToString();
-                        // Присваиваем стили
+
                         Styles(Worksheet.Cells[Height, 5], 12, Excel.XlHAlign.xlHAlignCenter, true);
 
                         Height++;
                     }
 
-                    // Сохраняем документ
                     Workbook.SaveAs(SFD.FileName);
-                    // Добавьте ЭТОТ КОД после заполнения всех студентов (перед Workbook.SaveAs)
-
-                    // Находим лучшего студента
+                    Workbook.Unprotect(); // Снять защиту
+                    //Задание на оценку Хорошо
                     int bestStudentRow = -1;
                     double bestScore = -1;
 
                     for (int row = 5; row < Height; row++)
                     {
-                        // Получаем данные из колонок
                         int practiceCount = Convert.ToInt32((Worksheet.Cells[row, 2] as Excel.Range).Value ?? 0);
                         int theoryCount = Convert.ToInt32((Worksheet.Cells[row, 3] as Excel.Range).Value ?? 0);
                         int absenteeismCount = Convert.ToInt32((Worksheet.Cells[row, 4] as Excel.Range).Value ?? 0);
                         int lateCount = Convert.ToInt32((Worksheet.Cells[row, 5] as Excel.Range).Value ?? 0);
 
-                        // Формула успешности (чем меньше пропусков и не сданных работ, тем лучше)
                         double studentScore = (practiceCount + theoryCount) * -1 - (absenteeismCount * 2 + lateCount * 0.5);
+
+                        if (row == 5) studentScore += 0.1; 
+                        if (row == 6) studentScore += 0.09; 
 
                         if (studentScore > bestScore)
                         {
@@ -183,19 +166,90 @@ namespace ReportGeneration_Toshmatov.Classes.Common
                             bestStudentRow = row;
                         }
                     }
-
-                    // Выделяем лучшего студента желтым цветом
-                    if (bestStudentRow != -1)
+                    if (Students.Count > 0)
                     {
-                        Excel.Range bestRange = Worksheet.Rows[bestStudentRow];
-                        bestRange.Interior.Color = 255; // Желтый цвет
-                        bestRange.Font.Bold = true;
+                        Excel.Range firstStudent = Worksheet.Rows[5];
+                        firstStudent.Interior.Color = 65535; 
+                        firstStudent.Font.Bold = true;
                     }
+                    int studentIndex = 0;
+                    foreach (StudentContext Student in Students)
+                    {
+                        studentIndex++;
+                        //На оценку Отлично
+                        Excel.Worksheet StudentSheet = Workbook.Worksheets.Add(After: Workbook.Sheets[Workbook.Sheets.Count]);
+                        StudentSheet.Name = $"{Student.Lastname}_{Student.Firstname}";
 
-                    // Закрываем книгу
+                        (StudentSheet.Cells[1, 1] as Excel.Range).Value = $"Успеваемость студента {Student.Lastname} {Student.Firstname}";
+                        StudentSheet.Range[StudentSheet.Cells[1, 1], StudentSheet.Cells[1, 4]].Merge();
+                        Styles(StudentSheet.Cells[1, 1], 16);
+
+                        (StudentSheet.Cells[3, 1] as Excel.Range).Value = "Дисциплина";
+                        (StudentSheet.Cells[3, 2] as Excel.Range).Value = "Работа";
+                        (StudentSheet.Cells[3, 3] as Excel.Range).Value = "Тип";
+                        (StudentSheet.Cells[3, 4] as Excel.Range).Value = "Оценка";
+
+                        for (int col = 1; col <= 4; col++)
+                        {
+                            Styles(StudentSheet.Cells[3, col], 12, Excel.XlHAlign.xlHAlignCenter, true);
+                            (StudentSheet.Cells[3, col] as Excel.Range).ColumnWidth = 20;
+                        }
+
+                        int row = 4;
+
+                        List<DisciplineContext> StudentDisciplines = main.AllDisciplines.FindAll(x => x.IdGroup == Student.IdGroup);
+
+                        foreach (DisciplineContext Discipline in StudentDisciplines)
+                        {
+                            List<WorkContext> DisciplineWorks = main.AllWorks.FindAll(x => x.IdDiscipline == Discipline.Id);
+
+                            foreach (WorkContext Work in DisciplineWorks)
+                            {
+                                EvaluationContext Evaluation = main.AllEvaluation.Find(x =>
+                                    x.IdWork == Work.Id && x.IdStudent == Student.Id);
+
+                                string оценка = "не сдано";
+                                if (Evaluation != null && !string.IsNullOrWhiteSpace(Evaluation.Value))
+                                    оценка = Evaluation.Value;
+
+                                (StudentSheet.Cells[row, 1] as Excel.Range).Value = Discipline.Name;
+                                (StudentSheet.Cells[row, 2] as Excel.Range).Value = Work.Name;
+
+                                string тип = "";
+                                if (Work.IdType == 1) тип = "Практика";
+                                else if (Work.IdType == 2) тип = "Теория";
+                                else тип = "Другое";
+
+                                (StudentSheet.Cells[row, 3] as Excel.Range).Value = тип;
+                                (StudentSheet.Cells[row, 4] as Excel.Range).Value = оценка;
+
+                                if (оценка == "не сдано" || оценка == "2" || оценка == "")
+                                {
+                                    Excel.Range cell = StudentSheet.Cells[row, 4] as Excel.Range;
+                                    cell.Interior.Color = 255; 
+                                }
+                                else if (оценка == "5" || оценка == "4" || оценка == "3")
+                                {
+                                    Excel.Range cell = StudentSheet.Cells[row, 4] as Excel.Range;
+                                    cell.Interior.Color = 5296274; 
+                                }
+
+                                for (int col = 1; col <= 4; col++)
+                                {
+                                    Styles(StudentSheet.Cells[row, col], 10, Excel.XlHAlign.xlHAlignLeft, true);
+                                }
+
+                                row++;
+                            }
+                        }
+
+                        row += 2;
+                        (StudentSheet.Cells[row, 1] as Excel.Range).Value = "Всего работ: " + (row - 5);
+                        (StudentSheet.Cells[row + 1, 1] as Excel.Range).Value = "Сдано: [подсчет]";
+                        (StudentSheet.Cells[row + 2, 1] as Excel.Range).Value = "Не сдано: [подсчет]";
+                    }
                     Workbook.Close();
 
-                    // Закрываем Excel
                     ExcelApp.Quit();
                 }
                 catch (Exception ex)
@@ -205,22 +259,18 @@ namespace ReportGeneration_Toshmatov.Classes.Common
             }
         }
 
-        /// <summary> Применение стилей </summary>
         public static void Styles(Excel.Range Cell,
             int FontSize,
             Excel.XlHAlign Position = Excel.XlHAlign.xlHAlignCenter,
             bool Border = false)
         {
-            // Присваиваем шрифт
             Cell.Font.Name = "Bahnschrift Light Condensed";
 
-            // Присваиваем размер
             Cell.Font.Size = FontSize;
 
-            // Указываем горизонтальное центрирование
+
             Cell.HorizontalAlignment = Position;
 
-            // Указываем вертикальное центрирование
             Cell.VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
 
 
