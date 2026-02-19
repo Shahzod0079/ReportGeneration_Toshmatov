@@ -20,8 +20,8 @@
                  IsEnabled="False" Grid.Column="1" Margin="10,10,4,0" 
                  VerticalContentAlignment="Center"/>
 
-        <TextBox Text="ИСВ-23-2" VerticalAlignment="Top" Height="25" IsEnabled="False" 
-                 Grid.Column="2" Margin="10,10,10,0" VerticalContentAlignment="Center"/>
+        <TextBox x:Name="TBGroup" Text="ИСВ-23-2" VerticalAlignment="Top" Height="25" IsEnabled="False" 
+                 Grid.Column="2" Margin="10,10,10,0" VerticalContentAlignment="Center" TextChanged="TextBox_TextChanged"/>
 
         <CheckBox x:Name="CBExplored" Content="Отчислен" VerticalAlignment="Top" 
                   Grid.Column="1" Margin="10,40,0,0" HorizontalAlignment="Left" 
