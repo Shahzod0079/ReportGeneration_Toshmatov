@@ -35,6 +35,7 @@ namespace ReportGeneration_Toshmatov.Pages
         public Main()
         {
             InitializeComponent();
+            CreateGroupUI(); 
         }
 
         public void CreateGroupUI()

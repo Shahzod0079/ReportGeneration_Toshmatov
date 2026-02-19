@@ -11,7 +11,6 @@ namespace ReportGeneration_Toshmatov.Items
     {
         private StudentContext student;
         private Main mainPage;
-        private Main main;
 
         public Student(StudentContext student, Main mainPage) 
         {

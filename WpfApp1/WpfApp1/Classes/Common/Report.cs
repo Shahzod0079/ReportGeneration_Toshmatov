@@ -5,6 +5,7 @@ using ReportGeneration_Toshmatov.Pages;
 using System;
 using System.Collections.Generic;
 using Excel = Microsoft.Office.Interop.Excel;
+using System.Drawing;
 
 namespace ReportGeneration_Toshmatov.Classes.Common
 {
@@ -159,6 +160,37 @@ namespace ReportGeneration_Toshmatov.Classes.Common
 
                     // Сохраняем документ
                     Workbook.SaveAs(SFD.FileName);
+                    // Добавьте ЭТОТ КОД после заполнения всех студентов (перед Workbook.SaveAs)
+
+                    // Находим лучшего студента
+                    int bestStudentRow = -1;
+                    double bestScore = -1;
+
+                    for (int row = 5; row < Height; row++)
+                    {
+                        // Получаем данные из колонок
+                        int practiceCount = Convert.ToInt32((Worksheet.Cells[row, 2] as Excel.Range).Value ?? 0);
+                        int theoryCount = Convert.ToInt32((Worksheet.Cells[row, 3] as Excel.Range).Value ?? 0);
+                        int absenteeismCount = Convert.ToInt32((Worksheet.Cells[row, 4] as Excel.Range).Value ?? 0);
+                        int lateCount = Convert.ToInt32((Worksheet.Cells[row, 5] as Excel.Range).Value ?? 0);
+
+                        // Формула успешности (чем меньше пропусков и не сданных работ, тем лучше)
+                        double studentScore = (practiceCount + theoryCount) * -1 - (absenteeismCount * 2 + lateCount * 0.5);
+
+                        if (studentScore > bestScore)
+                        {
+                            bestScore = studentScore;
+                            bestStudentRow = row;
+                        }
+                    }
+
+                    // Выделяем лучшего студента желтым цветом
+                    if (bestStudentRow != -1)
+                    {
+                        Excel.Range bestRange = Worksheet.Rows[bestStudentRow];
+                        bestRange.Interior.Color = 255; // Желтый цвет
+                        bestRange.Font.Bold = true;
+                    }
 
                     // Закрываем книгу
                     Workbook.Close();
@@ -205,5 +237,6 @@ namespace ReportGeneration_Toshmatov.Classes.Common
                 Cell.WrapText = true;
             }
         }
+
     }
 }

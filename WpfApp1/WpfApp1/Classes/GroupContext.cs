@@ -20,7 +20,7 @@ namespace ReportGeneration_Toshmatov.Classes
         {
             List<GroupContext> allgroups = new List<GroupContext>();
             MySqlConnection connection = Connection.OpenConnection();
-            MySqlDataReader BDGroups = Connection.Query("SELECT * FROM `group` ORDER BY `Name`", connection);
+            MySqlDataReader BDGroups = Connection.Query("SELECT * FROM `Group` ORDER BY `Name`", connection);
             while (BDGroups.Read())
             {
                 allgroups.Add(new GroupContext(
