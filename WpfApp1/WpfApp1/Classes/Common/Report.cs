@@ -33,7 +33,6 @@ namespace ReportGeneration_Toshmatov.Classes.Common
                     Workbook = ExcelApp.Workbooks.Add();
                     Excel.Worksheet Worksheet = Workbook.ActiveSheet;
 
-                    // Заголовки
                     ((Excel.Range)Worksheet.Cells[1, 1]).Value = $"Отчёт о группе {Group.Name}";
                     Worksheet.Range[Worksheet.Cells[1, 1], Worksheet.Cells[1, 5]].Merge();
                     Styles((Excel.Range)Worksheet.Cells[1, 1], 18);
@@ -53,7 +52,7 @@ namespace ReportGeneration_Toshmatov.Classes.Common
                     int Height = 5;
                     List<StudentContext> Students = main.AllStudents.FindAll(x => x.IdGroup == IdGroup);
 
-                    int[,] studentStats = new int[Students.Count, 8]; 
+                    int[,] studentStats = new int[Students.Count, 8];
 
                     for (int s = 0; s < Students.Count; s++)
                     {
@@ -124,29 +123,7 @@ namespace ReportGeneration_Toshmatov.Classes.Common
 
                         Height++;
                     }
-                    Excel.Worksheet StatsSheet = Workbook.Worksheets.Add();
-                    StatsSheet.Name = "Статистика";
-
-                    ((Excel.Range)StatsSheet.Cells[1, 1]).Value = "Студент";
-                    ((Excel.Range)StatsSheet.Cells[1, 2]).Value = "5";
-                    ((Excel.Range)StatsSheet.Cells[1, 3]).Value = "4";
-                    ((Excel.Range)StatsSheet.Cells[1, 4]).Value = "3";
-                    ((Excel.Range)StatsSheet.Cells[1, 5]).Value = "2";
-                    ((Excel.Range)StatsSheet.Cells[1, 6]).Value = "Несдано";
-                    ((Excel.Range)StatsSheet.Cells[1, 7]).Value = "Пропуски";
-                    ((Excel.Range)StatsSheet.Cells[1, 8]).Value = "Опоздания";
-
-                    for (int s = 0; s < Students.Count; s++)
-                    {
-                        ((Excel.Range)StatsSheet.Cells[s + 2, 1]).Value = Students[s].Lastname;  
-                        ((Excel.Range)StatsSheet.Cells[s + 2, 2]).Value = studentStats[s, 1];
-                        ((Excel.Range)StatsSheet.Cells[s + 2, 3]).Value = studentStats[s, 2];
-                        ((Excel.Range)StatsSheet.Cells[s + 2, 4]).Value = studentStats[s, 3];
-                        ((Excel.Range)StatsSheet.Cells[s + 2, 5]).Value = studentStats[s, 4];
-                        ((Excel.Range)StatsSheet.Cells[s + 2, 6]).Value = studentStats[s, 5];
-                        ((Excel.Range)StatsSheet.Cells[s + 2, 7]).Value = studentStats[s, 6];
-                        ((Excel.Range)StatsSheet.Cells[s + 2, 8]).Value = studentStats[s, 7];
-                    }
+                    //Задание на оценку Хорошо
                     int bestStudentRow = -1;
                     int worstStudentRow = -1;
                     double bestScore = double.MinValue;
@@ -179,21 +156,21 @@ namespace ReportGeneration_Toshmatov.Classes.Common
                         }
                     }
 
-                    // Выделение лучшего (зеленый) и худшего (красный)
                     if (bestStudentRow != -1)
                     {
                         Excel.Range bestRange = Worksheet.Rows[bestStudentRow];
-                        bestRange.Interior.Color = 5296274; // Зеленый
+                        bestRange.Interior.Color = 5296274; 
                         bestRange.Font.Bold = true;
                     }
 
                     if (worstStudentRow != -1 && worstStudentRow != bestStudentRow)
                     {
                         Excel.Range worstRange = Worksheet.Rows[worstStudentRow];
-                        worstRange.Interior.Color = 255; // Красный
+                        worstRange.Interior.Color = 255; 
                         worstRange.Font.Bold = true;
                     }
-                    // ОЦЕНКА ОТЛИЧНО - отдельные листы
+
+                    // Задание на оценку Отлично
                     int sheetCounter = 1;
                     foreach (StudentContext Student in Students)
                     {
@@ -202,12 +179,10 @@ namespace ReportGeneration_Toshmatov.Classes.Common
                             Excel.Worksheet StudentSheet = Workbook.Worksheets.Add();
                             StudentSheet.Name = Student.Lastname.Length > 30 ? Student.Lastname.Substring(0, 30) : Student.Lastname;
 
-                            // Заголовок
                             ((Excel.Range)StudentSheet.Cells[1, 1]).Value = $"Успеваемость студента {Student.Lastname} {Student.Firstname}";
                             StudentSheet.Range[StudentSheet.Cells[1, 1], StudentSheet.Cells[1, 4]].Merge();
                             Styles((Excel.Range)StudentSheet.Cells[1, 1], 16);
 
-                            // Заголовки таблицы
                             string[] studentHeaders = { "Дисциплина", "Работа", "Тип", "Оценка" };
                             for (int col = 0; col < studentHeaders.Length; col++)
                             {
@@ -217,7 +192,6 @@ namespace ReportGeneration_Toshmatov.Classes.Common
                             }
 
                             int rowData = 4;
-                            int count5_local = 0, count4_local = 0, count3_local = 0, count2_local = 0, count0_local = 0;
                             List<DisciplineContext> StudentDisciplines = main.AllDisciplines.FindAll(x => x.IdGroup == Student.IdGroup);
 
                             foreach (DisciplineContext Discipline in StudentDisciplines)
@@ -233,13 +207,6 @@ namespace ReportGeneration_Toshmatov.Classes.Common
                                     if (Evaluation != null && !string.IsNullOrWhiteSpace(Evaluation.Value))
                                         оценка = Evaluation.Value;
 
-                                    // Подсчет статистики
-                                    if (оценка == "5") count5_local++;
-                                    else if (оценка == "4") count4_local++;
-                                    else if (оценка == "3") count3_local++;
-                                    else if (оценка == "2") count2_local++;
-                                    else if (оценка == "не сдано" || оценка == "") count0_local++;
-
                                     ((Excel.Range)StudentSheet.Cells[rowData, 1]).Value = Discipline.Name;
                                     ((Excel.Range)StudentSheet.Cells[rowData, 2]).Value = Work.Name;
 
@@ -247,7 +214,6 @@ namespace ReportGeneration_Toshmatov.Classes.Common
                                     ((Excel.Range)StudentSheet.Cells[rowData, 3]).Value = тип;
                                     ((Excel.Range)StudentSheet.Cells[rowData, 4]).Value = оценка;
 
-                                    // Цвет оценки
                                     Excel.Range оценкаCell = (Excel.Range)StudentSheet.Cells[rowData, 4];
                                     if (оценка == "5" || оценка == "4")
                                         оценкаCell.Interior.Color = 5296274;
@@ -259,39 +225,6 @@ namespace ReportGeneration_Toshmatov.Classes.Common
                                     rowData++;
                                 }
                             }
-
-                            // Добавляем итоговую строку с подсчетом
-                            int итоговаяСтрока = rowData + 2;
-
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 1]).Value = "ИТОГО:";
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 1]).Font.Bold = true;
-
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 2]).Value = $"5: {count5_local}";
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 2]).Font.Bold = true;
-
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 3]).Value = $"4: {count4_local}";
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 3]).Font.Bold = true;
-
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 4]).Value = $"3: {count3_local}";
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 4]).Font.Bold = true;
-
-                            итоговаяСтрока++;
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 2]).Value = $"2: {count2_local}";
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 2]).Font.Bold = true;
-
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 3]).Value = $"Несдано: {count0_local}";
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 3]).Font.Bold = true;
-
-                            // Подсчет балла по формуле
-                            double studentScoreLocal = (count5_local * 5) + (count4_local * 4) + (count3_local * 3) +
-                                                        (count2_local * 1) - (count0_local * 2);
-
-                            итоговаяСтрока++;
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 1]).Value = "Общий балл:";
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 1]).Font.Bold = true;
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 2]).Value = studentScoreLocal.ToString();
-                            ((Excel.Range)StudentSheet.Cells[итоговаяСтрока, 2]).Font.Bold = true;
-
                             sheetCounter++;
                         }
                         catch (Exception ex)
@@ -304,7 +237,7 @@ namespace ReportGeneration_Toshmatov.Classes.Common
                     Workbook.Close();
                     ExcelApp.Quit();
 
-                    System.Windows.MessageBox.Show($"Отчёт успешно сохранён!\nЛучший студент - зеленый, худший - красный.");
+                    System.Windows.MessageBox.Show($"Отчёт успешно сохранён!\n");
                 }
                 catch (Exception ex)
                 {
